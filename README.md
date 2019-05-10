@@ -1,6 +1,7 @@
 # ssmblog
 演示地址：http://152.136.147.167/front/index.html
 测试账密：test:test
+项目部分页面还未实现（参考、账号设置）
 ## 项目简介
 个人博客网站，支持markdown编辑查看博客
 ## 后端
