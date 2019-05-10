@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+	<title></title>
+
+	<link href="https://cdn.bootcss.com/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+	<link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="https://cdn.bootcss.com/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/editor.md@1.5.0/css/editormd.min.css" />
+	<style>
+		html,
+		body {
+			overflow-x: hidden; /* Prevent scroll on narrow devices */
+		}
+		body {
+			padding-top: 70px;
+		}
+		footer {
+			padding: 30px 0;
+		}
+
+
+		.bs-docs-sidebar.affix {
+			position: static;
+		}
+		@media (min-width: 992px) {
+			.bs-docs-sidebar.affix{
+				width: 213px;
+			}
+			.bs-docs-sidebar.affix {
+				position: fixed;
+				top: 70px;
+			}
+		}
+		@media (min-width: 1200px) {
+			.bs-docs-sidebar.affix {
+				width: 263px;
+			}
+		}
+		#test-editormd-view a.reference-link{
+			position: relative;
+			top: -50px;
+			display: block;
+			height: 0;
+			overflow: hidden;
+		}
+	</style>
+
+	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+	<!--[if lt IE 9]>
+	<script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+	<script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+	<![endif]-->
+</head>
+<body>
+
+<header class="navbar navbar-inverse navbar-fixed-top">
+	<div class="container">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#nav" aria-expanded="false">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="index.html">首页</a>
+		</div>
+
+		<nav id="nav" class="navbar-collapse collapse">
+			<ul class="nav navbar-nav" >
+				<li class="active"><a href="index.html">发现 <span class="sr-only">(current)</span></a></li>
+				<li><a href="#">参考</a></li>
+			</ul>
+			<form class="navbar-form navbar-left">
+				<div class="form-group">
+					<input type="text" class="form-control" placeholder="Search" name="filter" id="filter">
+				</div>
+				<button type="button" class="btn btn-success" onclick="setFilter()">搜索</button>
+			</form>
+
+			<ul class="nav navbar-nav navbar-right" v-if="loginSuccess==='true'" v-cloak>
+				<li><a href="edit-article.html">写作</a></li>
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">个人中心 <span class="caret"></span></a>
+					<ul class="dropdown-menu">
+						<li><a href="#">账号设置</a></li>
+						<li><a href="myblog.html">我的博客</a></li>
+						<li role="separator" class="divider"></li>
+						<li><a onclick="logout()">退出</a></li>
+					</ul>
+				</li>
+			</ul>
+			<ul class="nav navbar-nav navbar-right" v-else v-cloak>
+				<li><a href="login.html">登录</a></li>
+			</ul>
+		</nav>
+	</div>
+</header>
+
+<section id="content">
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-12 col-sm-9" id="article-list">
+				<h1><b id="title"></b></h1>
+				<div id="test-editormd-view" class="markdown-body editormd-html-preview"></div>
+			</div>
+
+			<div class="col-xs-6 col-sm-3 " >
+				<div class="bs-docs-sidebar affix" id="custom-toc-container"></div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<footer>
+	<div class="container">
+		<p>&copy; 2019 YHH, All rights Reserved.</p>
+	</div>
+</footer>
+
+
+
+</body>
+</html>
+<script src="https://cdn.bootcss.com/jquery/3.4.0/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<script src="https://cdn.bootcss.com/vue/2.6.10/vue.min.js"></script>
+<!-- start 引入editormd.js -->
+<script src="https://pandao.github.io/editor.md/lib/marked.min.js"></script>
+<script src="https://pandao.github.io/editor.md/lib/prettify.min.js"></script>
+<script src="https://pandao.github.io/editor.md/lib/raphael.min.js"></script>
+<script src="https://pandao.github.io/editor.md/lib/underscore.min.js"></script>
+<script src="https://pandao.github.io/editor.md/lib/sequence-diagram.min.js"></script>
+<script src="https://pandao.github.io/editor.md/lib/flowchart.min.js"></script>
+<script src="https://pandao.github.io/editor.md/lib/jquery.flowchart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/editor.md@1.5.0/editormd.js"></script>
+<!-- end 引入editormd.js -->
+<script>
+	function getUrlParam(name){
+		var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+		var r = window.location.search.substr(1).match(reg);
+		if(r!=null)
+			return  unescape(r[2]);
+		return null;
+	}
+	function setFilter(){
+		var filter = $("#filter").val();
+		if(filter==null||$.trim(filter)=="")
+			return;
+		var categoryName = getUrlParam("categoryName");
+		if(categoryName==null||$.trim(categoryName)==""){
+			window.location.href="index.html?filter="+filter;
+		}else{
+			window.location.href="index.html?categoryName="+categoryName+"&filter="+filter;
+		}
+	}
+	var nav2=new Vue({
+		el: '#nav',
+		data: {
+			loginSuccess:"false"
+		},
+		beforeCreate:function(){
+			$.ajax({
+				url:"/checkLogin.do",
+				type:"POST",
+				dataType:"json",
+				success:function (result) {
+					if(result=="true"||result==true){
+						nav2.loginSuccess="true";
+					}else{
+						nav2.loginSuccess="false";
+					}
+				}
+			});
+		}
+	});
+	function logout(){
+		$.ajax({
+			url:"/logout.do",
+			type:"POST",
+			dataType:"json",
+			success:function (result) {
+				if(result=="true"||result==true){
+					nav2.loginSuccess="false";
+				}else{
+					nav2.loginSuccess="true";
+				}
+			}
+		});
+	}
+
+	$(document).ready( function () {
+		$.ajax({
+			url:"/loadArticle.do",
+			data:{"uuid":getUrlParam("uuid")},
+			dataType:"json",
+			success:function (result) {
+				$("#title").text(result.info.title);
+				$('title').text(result.info.title);
+				editormd.markdownToHTML("test-editormd-view", {
+					markdown        : result.markdown ,//+ "\r\n" + $("#append-test").text(),
+					//htmlDecode      : true,       // 开启 HTML 标签解析，为了安全性，默认不开启
+					htmlDecode      : "style,script,iframe",  // you can filter tags decode
+					//toc             : false,
+					tocm            : true,    // Using [TOCM]
+					tocContainer    : "#custom-toc-container", // 自定义 ToC 容器层
+					//gfm             : false,
+					//tocDropdown     : true,
+					// markdownSourceCode : true, // 是否保留 Markdown 源码，即是否删除保存源码的 Textarea 标签
+					emoji           : true,
+					taskList        : true,
+					tex             : true,  // 默认不解析
+					flowChart       : true,  // 默认不解析
+					sequenceDiagram : true,  // 默认不解析
+				});
+			}
+		})
+	});
+
+
+
+</script>

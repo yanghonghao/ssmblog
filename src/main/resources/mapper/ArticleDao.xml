@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.yhh.ssmblog.dao.ArticleDao" >
+    <resultMap id="ArticleCategoryResult" type="com.yhh.ssmblog.entity.ArticleCategory">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+    </resultMap>
+    <resultMap id="ArticleContentResult" type="com.yhh.ssmblog.entity.ArticleContent">
+        <result property="id" column="id"/>
+        <result property="uuid" column="uuid"/>
+        <result property="markdown" column="markdown"/>
+    </resultMap>
+    <resultMap id="ArticleInfoResult" type="com.yhh.ssmblog.entity.ArticleInfo">
+        <result property="id" column="id"/>
+        <result property="uuid" column="uuid"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="username" column="username"/>
+        <result property="categoryName" column="category_name"/>
+    </resultMap>
+
+    <select id="countArticle" resultType="int">
+        select count(*) from article_info where 1=1
+        <if test="username!=null">
+            and username = #{username}
+        </if>
+        <if test="categoryName!=null">
+            and category_name = #{categoryName}
+        </if>
+        <if test="filter!=null">
+            and title like #{filter}
+        </if>
+    </select>
+    <select id="listArticleInfo" resultMap="ArticleInfoResult">
+        select id,uuid,title,description,create_time,update_time,username,category_name from article_info where 1=1
+        <if test="categoryName!=null">
+            and category_name = #{categoryName}
+        </if>
+        <if test="username!=null">
+            and username = #{username}
+        </if>
+        <if test="filter!=null">
+            and title like #{filter}
+        </if>
+        <if test="column!=null and (order=='desc' or order=='asc')">
+            order by #{column} #{order}
+        </if>
+        <if test="start!=null and length!=null">
+            limit #{start},#{length}
+        </if>
+    </select>
+    <select id="getArticleInfo" resultMap="ArticleInfoResult">
+        select id,uuid,title,create_time,update_time,username,category_name from article_info where uuid = #{uuid}
+    </select>
+    <select id="getArticleMarkdown" resultType="string">
+        select markdown from article_content where uuid = #{uuid}
+    </select>
+
+
+    <update id="updateArticleInfo">
+        update article_info
+        set update_time = #{updateTime}
+        <if test="title!=null">
+            , title = #{title}
+        </if>
+        <if test="description!=null">
+            , description = #{description}
+        </if>
+        <if test="categoryName!=null">
+            , category_name = #{categoryName}
+        </if>
+        where uuid = #{uuid}
+    </update>
+    <update id="updateArticleContent">
+        update article_content
+        set markdown = #{markdown}
+        where uuid = #{uuid}
+    </update>
+    <insert id="insertArticleInfo">
+        insert into article_info(uuid,title,description,create_time,update_time,username,category_name)
+        values (#{uuid},#{title},#{description},#{createTime},#{createTime},#{username},#{categoryName})
+    </insert>
+    <insert id="insertArticleContent">
+        insert into article_content(uuid,markdown)
+        values (#{uuid},#{markdown})
+    </insert>
+    <delete id="deleteArticleInfo">
+        delete from article_info where uuid = #{uuid}
+    </delete>
+    <delete id="deleteArticleContent">
+        delete from article_content where uuid = #{uuid}
+    </delete>
+
+    <select id="checkUuid" resultType="int">
+        select count(*) from article_info where uuid=#{uuid}
+    </select>
+    <select id="checkColumn" resultType="int">
+        select count(*) from information_schema.columns where table_name='article_info' and column_name=#{column}
+    </select>
+    <select id="checkCategory" resultType="int">
+        select count(*) from article_category where name = #{categoryName}
+    </select>
+    <select id="checkUser" resultType="int">
+        select count(*) from rbac_user where username = #{username}
+    </select>
+    <select id="checkArticle" resultType="int">
+        select count(*) from article_info where uuid = #{uuid}
+        <if test="username!=null">
+            and username = #{username}
+        </if>
+    </select>
+</mapper>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <import resource="spring-mybatis.xml"/>
+
+    <bean class="org.apache.shiro.spring.web.ShiroFilterFactoryBean" id="shiroFilter">
+        <property name="securityManager" ref="securityManager"/>
+        <property name="loginUrl" value="/front/login.html"/>
+        <property name="unauthorizedUrl" value="/front/403.html"/>
+        <property name="filterChainDefinitions">
+            <value>
+                /front/login.html = anon
+                /front/index.html = anon
+                /front/article.html = anon
+                /listArticle.do = anon
+                /login.do = anon
+                /loadArticle.do = anon
+                /checkLogin.do = anon
+                /* = authc
+            </value>
+        </property>
+    </bean>
+
+    <bean class="org.apache.shiro.web.mgt.DefaultWebSecurityManager" id="securityManager">
+        <property name="realm" ref="jdbcRealm"/>
+    </bean>
+
+    <bean class="org.apache.shiro.realm.jdbc.JdbcRealm" id="jdbcRealm">
+        <property name="dataSource" ref="dataSource"/>
+<!--        <property name="credentialsMatcher" ref="credentialsMatcher"/>-->
+        <property name="permissionsLookupEnabled" value="true"/>
+        <property name="authenticationQuery" value="select password from rbac_user where username = ?"/>
+        <property name="permissionsQuery" value="select permission from rbac_role_permissions where rolename = ?"/>
+        <property name="userRolesQuery" value="select rolename from rbac_user_roles where username = ?"/>
+    </bean>
+
+<!--    <bean class="org.apache.shiro.authc.credential.HashedCredentialsMatcher" id="credentialsMatcher">-->
+<!--        <property name="hashAlgorithmName" value="md5"/>-->
+<!--        <property name="hashIterations" value="1"/>-->
+<!--    </bean>-->
+
+</beans>

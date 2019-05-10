@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+	<title>edit-article</title>
+
+	<link href="https://cdn.bootcss.com/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+	<link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="https://cdn.bootcss.com/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/editor.md@1.5.0/css/editormd.min.css" />
+	<style>
+		html,body{
+			height:100%;
+		}
+		body{
+			background-color:#f4f4f4;
+		}
+		#title{
+			display: inline-block;
+			min-width:70%;
+			padding: 8px;
+			font-size: 18px;
+			line-height: 24px;
+			margin:10px;
+			border:1px solid #aaa;
+			border-radius:4px;
+			outline:0px;
+		}
+	</style>
+
+	<!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+	<!--[if lt IE 9]>
+	  <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+	  <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+	<![endif]-->
+</head>
+<body>
+	<header>
+		<input id="title" type="text" placeholder="请输入文章标题" autocomplete="off"/>
+		<a href="index.html" class="btn btn-success">返回主页</a>
+		<select id="category" class="form-control"  style="display: inline-block;min-width:150px;max-width:200px;">
+			<option value="default">默认分类</option>
+			<option value="javabasic">java基础</option>
+			<option value="javapro">java进阶</option>
+			<option value="javaframework">java框架</option>
+			<option value="redis">redis</option>
+			<option value="sql">sql</option>
+			<option value="linux">linux</option>
+			<option value="docker">docker</option>
+			<option value="git">git</option>
+		</select>
+	</header>
+	<section style="height:calc(100% - 62px)">
+		<div id="editormd">
+			<textarea style="display:none;">### Hello Editor.md !</textarea>
+		</div>
+	</section>
+
+</body>
+</html>
+<script src="https://cdn.bootcss.com/jquery/3.4.0/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/toastr.js/latest/toastr.min.js"></script>
+<script src="https://cdn.bootcss.com/FileSaver.js/2014-11-29/FileSaver.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/editor.md@1.5.0/editormd.js"></script>
+<script>
+
+function getUrlParam(paraName) {
+	var url = document.location.toString();
+	var arrObj = url.split("?");
+
+	if (arrObj.length > 1) {
+		var arrPara = arrObj[1].split("=");
+		if(arrPara.length>1){
+			return arrPara[1];
+		}
+	}
+}
+var uuid=getUrlParam("uuid");
+
+var titleStatue=0;
+var categoryStatu=0;
+var contentStatu=0;
+var articleData={};
+$(function() {
+	var editor = editormd("editormd", {
+		path : "https://cdn.jsdelivr.net/npm/editor.md@1.5.0/lib/",
+		width: "100%",
+		height: "98%",
+		toolbarIcons : function() {
+            return [
+				"undo", "redo"
+				,"|", 
+				"bold","del","italic", "hr","quote", "ucwords", "uppercase", "lowercase"
+				, "|",
+				"h1","h2","h3","h4","h5"
+				,"|",
+				"link","image","table","list-ul","list-ol"
+				,"|",
+				"html-entities","emoji","code","code-block"
+				,"||", 
+				"save","watch", "preview"
+			]
+        },
+		toolbarIconsClass:{
+			save:"fa-save"
+		},
+		toolbarHandlers:{
+			save:function(cm,icon,cursor,selection){
+				if(titleStatue+contentStatu+categoryStatu==0){
+					toastr.info('无新内容');
+					return;
+				}
+				if($("#title").val().trim()==""){
+					alert("标题不能为空");
+					return;
+				}
+				if(editor.getMarkdown().trim()==""){
+					alert("内容不能为空");
+					return;
+				}
+				if(titleStatue!=0){
+					articleData.title=$("#title").val();
+					titleStatue=0;
+				}
+				if(categoryStatu!=0){
+					articleData.categoryName=$("#category").val();
+					categoryStatu=0;
+				}
+				if(contentStatu!=0){
+					articleData.markdown=editor.getMarkdown();
+					contentStatu=0;
+				}
+				if(uuid){
+					articleData.uuid=uuid;
+				}
+				toastr.info('正在保存')
+				$.ajax({
+					url: "/saveArticle.do",
+					type:"POST",
+					dataType:"text",
+					data:articleData,
+					success: function(result){
+						if(result=="true"||result==true){
+							toastr.success('保存成功');
+						}else{
+							toastr.warning('保存失败');
+							contentStatu=1;
+							titleStatue=1;
+							categoryStatu=1;
+						}
+					}
+				});
+			}
+		},
+		onchange:function(){
+			contentStatu=1;
+		},
+		onload : function () {
+			$.ajax({
+				url: "/checkLogin.do",
+				type: "POST",
+				dataType: "json",
+				success: function (result) {
+					if (!(result == "true" || result == true)) {
+						window.location.href = "login.html";
+					}
+				}
+			});
+
+			var uuid=getUrlParam(uuid);
+			if(uuid!=null){
+				$.ajax({
+					url: "/loadMarkdown.do",
+					type:"GET",
+					dataType:'json',
+					data:{"uuid":uuid},
+					success: function(result){
+						var content=result.markdown;
+						var title=result.info.title;
+						editor.setMarkdown(content);
+						$("#title").val(title);
+					}
+				});
+			}
+		}
+	});
+});
+
+
+$("#title").change(function(){
+	titleStatue=1;
+});
+$("#category").change(function(){
+	categoryStatu=1;
+})
+</script>
