@@ -25,20 +25,38 @@
 
     <bean class="org.apache.shiro.web.mgt.DefaultWebSecurityManager" id="securityManager">
         <property name="realm" ref="jdbcRealm"/>
+        <property name="sessionManager" ref="sessionManager"/>
+        <property name="cacheManager" ref="cacheManager"/>
+        <property name="rememberMeManager" ref="cookieRememberMeManager"/>
     </bean>
 
     <bean class="org.apache.shiro.realm.jdbc.JdbcRealm" id="jdbcRealm">
         <property name="dataSource" ref="dataSource"/>
-<!--        <property name="credentialsMatcher" ref="credentialsMatcher"/>-->
         <property name="permissionsLookupEnabled" value="true"/>
         <property name="authenticationQuery" value="select password from rbac_user where username = ?"/>
         <property name="permissionsQuery" value="select permission from rbac_role_permissions where rolename = ?"/>
         <property name="userRolesQuery" value="select rolename from rbac_user_roles where username = ?"/>
+        <property name="credentialsMatcher" ref="credentialsMatcher"/>
     </bean>
 
-<!--    <bean class="org.apache.shiro.authc.credential.HashedCredentialsMatcher" id="credentialsMatcher">-->
-<!--        <property name="hashAlgorithmName" value="md5"/>-->
-<!--        <property name="hashIterations" value="1"/>-->
-<!--    </bean>-->
+    <bean class="org.apache.shiro.authc.credential.HashedCredentialsMatcher" id="credentialsMatcher">
+        <property name="hashAlgorithmName" value="md5"/>
+        <property name="hashIterations" value="1"/>
+    </bean>
+
+    <bean class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager" id="sessionManager">
+        <property name="sessionDAO" ref="redisSessionDao"/>
+    </bean>
+    <bean class="com.yhh.ssmblog.shiro.RedisSessionDao" id="redisSessionDao"/>
+
+    <bean class="com.yhh.ssmblog.shiro.RedisCacheManager" id="cacheManager"/>
+
+    <bean class="org.apache.shiro.web.mgt.CookieRememberMeManager" id="cookieRememberMeManager">
+        <property name="cookie" ref="simpleCookie"/>
+    </bean>
+    <bean class="org.apache.shiro.web.servlet.SimpleCookie" id="simpleCookie">
+        <constructor-arg value="rememberMe"/>
+        <property name="maxAge" value="604800"/>
+    </bean>
 
 </beans>

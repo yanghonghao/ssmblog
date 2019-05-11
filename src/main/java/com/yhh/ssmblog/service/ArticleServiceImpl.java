@@ -88,6 +88,10 @@ public class ArticleServiceImpl implements ArticleService{
         int a=0;
         if(markdown!=null){
             a+=articleDao.updateArticleContent(uuid,markdown);
+            if(markdown.length()<120)
+                description=markdown;
+            else
+                description=markdown.substring(0,120);
         }
         if(articleDao.checkCategory(categoryName)==0)
             categoryName=null;
@@ -106,8 +110,12 @@ public class ArticleServiceImpl implements ArticleService{
         if(articleDao.checkUser(username)==0)
             return false;
         String description=null;
-        if(markdown!=null)
-            description=markdown.substring(0,120);
+        if(markdown!=null){
+            if(markdown.length()<120)
+                description=markdown;
+            else
+                description=markdown.substring(0,120);
+        }
         if(articleDao.insertArticleInfo(uuid, title,description, createTime, username, categoryName)<1) {
             try {
                 throw new Exception("save falied");

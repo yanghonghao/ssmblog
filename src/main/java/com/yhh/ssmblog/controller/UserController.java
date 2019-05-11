@@ -1,5 +1,6 @@
 package com.yhh.ssmblog.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.annotations.Param;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -17,9 +18,14 @@ public class UserController {
     public String login(HttpServletRequest request){
         String username = request.getParameter("username");
         String password = request.getParameter("password");
+        String rememberMe = request.getParameter("rememberMe");
         UsernamePasswordToken token = new UsernamePasswordToken(username,password);
         Subject subject = SecurityUtils.getSubject();
         try {
+            if(rememberMe.trim().equalsIgnoreCase("true"))
+                token.setRememberMe(true);
+            else
+                token.setRememberMe(false);
             subject.login(token);
         } catch (Exception e) {
             e.printStackTrace();
@@ -30,9 +36,16 @@ public class UserController {
 
     @RequestMapping("checkLogin")
     @ResponseBody
-    public String checkLogin(){
+    public JSONObject checkLogin(){
         Subject subject = SecurityUtils.getSubject();
-        return String.valueOf(subject.isAuthenticated());
+        JSONObject json = new JSONObject();
+        if(subject.isAuthenticated()){
+            json.put("username",subject.getPrincipal());
+            json.put("result","true");
+        }else{
+            json.put("result","false");
+        }
+        return json;
     }
 
     @RequestMapping("logout.do")

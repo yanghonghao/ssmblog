@@ -70,7 +70,7 @@
 			<input type="password" id="inputPassword" name="password" class="form-control" placeholder="密码" required>
 			<div class="checkbox">
 				<label>
-					<input type="checkbox" value="remember-me"> 30天内记住我
+					<input type="checkbox" value="rememberMe" id="rememberMe"> 30天内记住我
 				</label>
 			</div>
 			<div id="errorMessage" style="color:red"></div>
@@ -86,15 +86,19 @@
 	$("#login").click(function () {
 		var username=$("#inputUsername").val();
 		var password=$("#inputPassword").val();
+		var rememberMe="false";
+		if($('#rememberMe').is(':checked')) {
+			rememberMe="true";
+		}
 		$.ajax({
 			url:"/login.do",
 			type:"POST",
-			data:{"username":username,"password":password},
+			data:{"username":username,"password":password,"rememberMe":rememberMe},
 			dataType:"json",
 			success:function(result){
 				if(result=="true"||result==true){
 					$("#errorMessage").text("");
-					window.location.href="index.html";
+					window.location.href="/front/index.html";
 				}else{
 					$("#errorMessage").text("用户名或密码错误");
 				}

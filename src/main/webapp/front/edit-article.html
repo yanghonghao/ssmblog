@@ -41,7 +41,7 @@
 <body>
 	<header>
 		<input id="title" type="text" placeholder="请输入文章标题" autocomplete="off"/>
-		<a href="index.html" class="btn btn-success">返回主页</a>
+		<a href="/front/index.html" class="btn btn-success">返回主页</a>
 		<select id="category" class="form-control"  style="display: inline-block;min-width:150px;max-width:200px;">
 			<option value="default">默认分类</option>
 			<option value="javabasic">java基础</option>
@@ -165,8 +165,8 @@ $(function() {
 				type: "POST",
 				dataType: "json",
 				success: function (result) {
-					if (!(result == "true" || result == true)) {
-						window.location.href = "login.html";
+					if (!(result.result == "true" || result.result == true)) {
+						window.location.href = "/front/login.html";
 					}
 				}
 			});
